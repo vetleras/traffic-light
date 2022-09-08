@@ -17,6 +17,10 @@ public class PeriodicTimerMachine implements IStateMachine {
 	private Timer t1 = new Timer("t1");
 	protected STATES state = STATES.IDLE;
 
+	private static final int n = 5;
+	private int ticks = 0;
+
+
 	public int fire(String event, Scheduler scheduler) {
 		if (state == STATES.IDLE) {
 			if (event.equals(START)) {
@@ -33,9 +37,14 @@ public class PeriodicTimerMachine implements IStateMachine {
 				state = STATES.IDLE;
 				return EXECUTE_TRANSITION;
 			} else if (event.equals(TIMER_1)) {
-				System.out.println("tick");
-				t1.start(scheduler, 1000);
-				state = STATES.ACTIVE;
+				ticks++;
+				System.out.format("tick %d\n", ticks);
+				if (ticks == n) {
+					state = STATES.IDLE;
+					ticks = 0;
+				} else {
+					t1.start(scheduler, 1000);
+				}
 				return EXECUTE_TRANSITION;
 			} else if (event.equals(EXIT)) {
 				t1.stop();
