@@ -12,7 +12,7 @@ public class TrafficLightControllerMachine implements IStateMachine {
 	public static final String[] EVENTS = { PEDESTRIAN_BUTTON_PRESSED };
 
 	private enum STATES {
-		S0, S1, S2, S3, S4, S5
+		S0, S1, S2, S3, S4, S5, S6
 	}
 
 	private Timer t1 = new Timer("t1");
@@ -20,11 +20,14 @@ public class TrafficLightControllerMachine implements IStateMachine {
 	private Timer t3 = new Timer("t3");
 	private Timer t4 = new Timer("t4");
 	private Timer t5 = new Timer("t5");
+	private Timer t6 = new Timer("t6");
 
 	protected STATES state = STATES.S0;
 
 	private TrafficLight cars = new TrafficLight("Cars", true);
 	private TrafficLight pedestrians = new TrafficLight("Pedestrians", false);
+
+	private boolean pedestrianButtonPressed = false;
 
 	public TrafficLightControllerMachine() {
 		// initial transition
@@ -36,53 +39,82 @@ public class TrafficLightControllerMachine implements IStateMachine {
 
 	public int fire(String event, Scheduler scheduler) {
 		switch (state) {
-			case S0: {
+			case S0:
 				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
 					cars.showYellow();
 					t1.start(scheduler, 1000);
 					state = STATES.S1;
 					return EXECUTE_TRANSITION;
 				}
-			}
-			case S1: {
+				break;
+
+			case S1:
 				if (event.equals("t1")) {
 					cars.showRed();
 					t2.start(scheduler, 1000);
 					state = STATES.S2;
 					return EXECUTE_TRANSITION;
 				}
-			}
-			case S2: {
+				break;
+
+			case S2:
 				if (event.equals("t2")) {
 					pedestrians.showGreen();
 					t3.start(scheduler, 5000);
 					state = STATES.S3;
 					return EXECUTE_TRANSITION;
 				}
-			}
-			case S3: {
+				break;
+
+			case S3:
 				if (event.equals("t3")) {
 					pedestrians.showRed();
 					t4.start(scheduler, 1000);
 					state = STATES.S4;
 					return EXECUTE_TRANSITION;
 				}
-			}
-			case S4: {
-				if (event.equals("t4")) {
+				break;
+
+			case S4:
+				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+					pedestrianButtonPressed = true;
+					return EXECUTE_TRANSITION;
+				} else if (event.equals("t4")) {
 					cars.showRedYellow();
 					t5.start(scheduler, 1000);
 					state = STATES.S5;
 					return EXECUTE_TRANSITION;
 				}
-			}
-			case S5: {
-				if (event.equals("t5")) {
+				break;
+
+			case S5:
+				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+					pedestrianButtonPressed = true;
+					return EXECUTE_TRANSITION;
+				} else if (event.equals("t5")) {
 					cars.showGreen();
-					state = STATES.S0;
+					t6.start(scheduler, 5000);
+					state = STATES.S6;
 					return EXECUTE_TRANSITION;
 				}
-			}
+				break;
+
+			case S6:
+				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+					pedestrianButtonPressed = true;
+					return EXECUTE_TRANSITION;
+				} else if (event.equals("t6")) {
+					if (pedestrianButtonPressed) {
+						cars.showYellow();
+						t1.start(scheduler, 1000);
+						state = STATES.S1;
+						pedestrianButtonPressed = false;
+					} else {
+						state = STATES.S0;
+					}
+					return EXECUTE_TRANSITION;
+				}
+				break;
 		}
 		return DISCARD_EVENT;
 	}
