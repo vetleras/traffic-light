@@ -43,6 +43,7 @@ public class TrafficLightControllerMachine implements IStateMachine {
 				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
 					cars.showYellow();
 					t1.start(scheduler, 1000);
+					t6.start(scheduler, 60*1000);
 					state = STATES.S1;
 					return EXECUTE_TRANSITION;
 				}
@@ -93,7 +94,6 @@ public class TrafficLightControllerMachine implements IStateMachine {
 					return EXECUTE_TRANSITION;
 				} else if (event.equals("t5")) {
 					cars.showGreen();
-					t6.start(scheduler, 5000);
 					state = STATES.S6;
 					return EXECUTE_TRANSITION;
 				}
@@ -104,13 +104,12 @@ public class TrafficLightControllerMachine implements IStateMachine {
 					pedestrianButtonPressed = true;
 					return EXECUTE_TRANSITION;
 				} else if (event.equals("t6")) {
+					t6.start(scheduler, 60*1000);
 					if (pedestrianButtonPressed) {
 						cars.showYellow();
 						t1.start(scheduler, 1000);
 						state = STATES.S1;
 						pedestrianButtonPressed = false;
-					} else {
-						state = STATES.S0;
 					}
 					return EXECUTE_TRANSITION;
 				}
