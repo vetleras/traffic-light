@@ -1,15 +1,11 @@
 package exercises.trafficlight;
 
-import runtime.EventWindow;
 import runtime.IStateMachine;
 import runtime.Scheduler;
 import runtime.Timer;
 
 public class TrafficLightControllerMachine implements IStateMachine {
-
-	private static final String PEDESTRIAN_BUTTON_PRESSED = "Pedestrian Button";
-
-	public static final String[] EVENTS = { PEDESTRIAN_BUTTON_PRESSED };
+	public static final String PEDESTRIAN_BUTTON_PRESSED = "Pedestrian Button";
 
 	private enum STATES {
 		S0, S1, S2, S3, S4, S5, S6
@@ -117,12 +113,11 @@ public class TrafficLightControllerMachine implements IStateMachine {
 
 	public static void main(String[] args) {
 		IStateMachine stm = new TrafficLightControllerMachine();
-		Scheduler s = new Scheduler(stm);
+		Scheduler scheduler = new Scheduler(stm);
 
-		EventWindow w = new EventWindow(EVENTS, s);
-		w.show();
+		new ButtonListener(scheduler, TrafficLightControllerMachine.PEDESTRIAN_BUTTON_PRESSED);
 
-		s.start();
+		scheduler.start();
 	}
 
 }
