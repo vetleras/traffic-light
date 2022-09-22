@@ -1,110 +1,77 @@
 package exercises.trafficlight;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+public class TrafficLight {
+	private Signal red, yellow, green;
 
-public class TrafficLight extends JFrame {
-	
-	private Signal green = new Signal(Color.green);
-	private Signal yellow = new Signal(Color.yellow);
-	private Signal red = new Signal(Color.red);
-
-	public TrafficLight(String title, boolean showYellow){
-		super(title);
-		getContentPane().setLayout(new GridLayout(1, 1));
-		green.turnOn(false);
-		yellow.turnOn(false);
-		red.turnOn(false);
-
-		JPanel p1;
-		if(showYellow) {
-			p1 = new JPanel(new GridLayout(3,1));
-			p1.add(red);
-			p1.add(yellow);
+	public TrafficLight(boolean showYellow){
+		if (showYellow) {
+			red = new Signal(RaspiPin.GPIO_07);
+			yellow = new Signal(RaspiPin.GPIO_03);
+			green = new Signal(RaspiPin.GPIO_13);
 		} else {
-			p1 = new JPanel(new GridLayout(2,1));
-			p1.add(red);
+			red = new Signal(RaspiPin.GPIO_00);
+			green = new Signal(RaspiPin.GPIO_14);
 		}
-		p1.add(green);
-
-		getContentPane().add(p1);
-		pack();
 	}
-	
+
 	public void showGreen() {
-		red.turnOn(false);
-		if(yellow!=null) yellow.turnOn(false);
-		green.turnOn(true);
+		red.turnOff();
+		if(yellow!=null) yellow.turnOff();
+		green.turnOn();
 	}
 
 	public void showRed() {
-		red.turnOn(true);
-		if(yellow!=null) yellow.turnOn(false);
-		green.turnOn(false);
+		red.turnOn();
+		if(yellow!=null) yellow.turnOff();
+		green.turnOff();
 	}
 
 	public void showRedYellow() {
 		if(yellow==null) {
 			throw new UnsupportedOperationException("Traffic light has no yellow light.");
 		}
-		red.turnOn(true);
-		yellow.turnOn(true);
-		green.turnOn(false);
+		red.turnOn();
+		yellow.turnOn();
+		green.turnOff();
 	}
 
 	public void showYellow() {
 		if(yellow==null) {
 			throw new UnsupportedOperationException("Traffic light has no yellow light.");
 		}
-		red.turnOn(false);
-		yellow.turnOn(true);
-		green.turnOn(false);
+		red.turnOff();
+		yellow.turnOn();
+		green.turnOff();
 	}
 
 	public void switchAllOff() {
-		red.turnOn(false);
-		if(yellow!=null) yellow.turnOn(false);
-		green.turnOn(false);
+		red.turnOff();
+		if(yellow!=null) yellow.turnOff();
+		green.turnOff();
 	}
 	
 	
-	private static class Signal extends JPanel{
+	private class Signal{
+		private GpioPinDigitalOutput pin;
 
-		Color on;
-		int radius = 40;
-		int border = 10;
-		boolean change;
-
-		Signal(Color color){
-			on = color;
-			change = true;
+		Signal(Pin pin){
+			this.pin = GpioFactory.getInstance().provisionDigitalOutputPin(pin, PinState.LOW);
+			this.pin.setShutdownOptions(true, PinState.LOW, PinPullResistance.OFF);
 		}
 
-		public void turnOn(boolean a){
-			change = a;
-			repaint();        
+		public void turnOn(){
+			pin.setState(PinState.HIGH);       
 		}
 
-		public Dimension getPreferredSize(){
-			int size = (radius+border)*2;
-			return new Dimension( size, size );
-		}
-
-		public void paintComponent(Graphics g){
-			g.setColor( Color.black );
-			g.fillRect(0,0,getWidth(),getHeight());
-
-			if (change){
-				g.setColor( on );
-			} else {
-				g.setColor( on.darker().darker().darker() );
-			}
-			g.fillOval( border,border,2*radius,2*radius );
+		public void turnOff(){
+			pin.setState(PinState.LOW);       
 		}
 	}
 }     

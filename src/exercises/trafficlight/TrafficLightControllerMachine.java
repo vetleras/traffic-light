@@ -24,15 +24,12 @@ public class TrafficLightControllerMachine implements IStateMachine {
 
 	protected STATES state = STATES.S0;
 
-	private TrafficLight cars = new TrafficLight("Cars", true);
-	private TrafficLight pedestrians = new TrafficLight("Pedestrians", false);
+	private TrafficLight cars = new TrafficLight(true);
+	private TrafficLight pedestrians = new TrafficLight(false);
 
 	private boolean pedestrianButtonPressed = false;
 
 	public TrafficLightControllerMachine() {
-		// initial transition
-		cars.setVisible(true);
-		pedestrians.setVisible(true);
 		cars.showGreen();
 		pedestrians.showRed();
 	}
