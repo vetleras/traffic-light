@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "pi4j-1.4/**/*.jar"
+    ]
+}
