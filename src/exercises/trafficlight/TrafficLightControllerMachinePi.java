@@ -18,6 +18,8 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	private static final String TIMER_1 = "t1";
 	private static final String TIMER_2 = "t2";
 	private static final String TIMER_3 = "t3";
+	private static final String TIMER_35 = "t35";
+
 	private static final String TIMER_4 = "t4";
 	private static final String TIMER_5 = "t5";
 
@@ -76,7 +78,7 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 				return EXECUTE_TRANSITION;
 			}
 		} else if (state == STATES.S35) {
-			if (event.equals(TIMER_3)) {
+			if (event.equals(TIMER_35)) {
 				buzzer.off();
 				t4.start(scheduler, 2000);
 				state = STATES.S4;
