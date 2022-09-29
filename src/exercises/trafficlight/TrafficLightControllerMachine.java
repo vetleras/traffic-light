@@ -5,9 +5,6 @@ import runtime.IStateMachine;
 import runtime.Scheduler;
 import runtime.Timer;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-
 import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -19,7 +16,6 @@ public class TrafficLightControllerMachine implements IStateMachine {
 	public static final String HOSTNAME = "192.168.0.194";
 
 	private static final String PEDESTRIAN_BUTTON_PRESSED = "Pedestrian Button";
-	private static final String TIMER_0 = "t0";
 	private static final String TIMER_1 = "t1";
 	private static final String TIMER_2 = "t2";
 	private static final String TIMER_3 = "t3";
@@ -34,7 +30,6 @@ public class TrafficLightControllerMachine implements IStateMachine {
 		S0, S1, S2, S3, S4, S5, WAIT
 	}
 
-	private Timer t0 = new Timer("t0");
 	private Timer t1 = new Timer("t1");
 	private Timer t2 = new Timer("t2");
 	private Timer t3 = new Timer("t3");

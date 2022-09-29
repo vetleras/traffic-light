@@ -1,12 +1,8 @@
 package exercises.trafficlight;
 
-import runtime.EventWindow;
 import runtime.IStateMachine;
 import runtime.Scheduler;
 import runtime.Timer;
-
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
 
 import java.net.Socket;
 import java.io.BufferedReader;
@@ -19,7 +15,6 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	public static final String HOSTNAME = "192.168.0.194";
 
 	private static final String PEDESTRIAN_BUTTON_PRESSED = "Pedestrian Button";
-	private static final String TIMER_0 = "t0";
 	private static final String TIMER_1 = "t1";
 	private static final String TIMER_2 = "t2";
 	private static final String TIMER_3 = "t3";
@@ -31,13 +26,13 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	public static final String SYNC = "SYNC";
 
 	private enum STATES {
-		S0, S1, S2, S3, S4, S5, WAIT
+		S0, S1, S2, S3, S35, S4, S5, WAIT
 	}
 
-	private Timer t0 = new Timer("t0");
 	private Timer t1 = new Timer("t1");
 	private Timer t2 = new Timer("t2");
 	private Timer t3 = new Timer("t3");
+	private Timer t35 = new Timer("t35");
 	private Timer t4 = new Timer("t4");
 	private Timer t5 = new Timer("t5");
 
@@ -47,6 +42,8 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	private TrafficLightPi pedestrians = new TrafficLightPi(false);
 
 	private boolean buttonFlag = false;
+
+	private Buzzer buzzer = new Buzzer();
 
 	public TrafficLightControllerMachinePi() {
 		// initial transition
@@ -65,14 +62,23 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 		} else if (state == STATES.S2) {
 			if (event.equals(TIMER_2)) {
 				pedestrians.showGreen();
-				t3.start(scheduler, 4000);
+				buzzer.pedestrian();
+				t3.start(scheduler, 2000);
 				state = STATES.S3;
 				return EXECUTE_TRANSITION;
 			}
 		} else if (state == STATES.S3) {
 			if (event.equals(TIMER_3)) {
 				pedestrians.showRed();
-				t4.start(scheduler, 4000);
+				buzzer.car();
+				t35.start(scheduler, 2000);
+				state = STATES.S35;
+				return EXECUTE_TRANSITION;
+			}
+		} else if (state == STATES.S35) {
+			if (event.equals(TIMER_3)) {
+				buzzer.off();
+				t4.start(scheduler, 2000);
 				state = STATES.S4;
 				return EXECUTE_TRANSITION;
 			}
