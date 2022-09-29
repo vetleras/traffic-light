@@ -45,9 +45,8 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 
 	protected STATES state = STATES.WAIT;
 	
-	static final GpioController gpio = GpioFactory.getInstance();
-	private TrafficLight cars = new TrafficLightPi("Cars", true, gpio);
-	private TrafficLight pedestrians = new TrafficLightPi("Pedestrians", false, gpio);
+	private TrafficLightPi cars = new TrafficLightPi(true);
+	private TrafficLightPi pedestrians = new TrafficLightPi(false);
 
 	
 	private boolean buttonFlag = false;
@@ -122,6 +121,9 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	public static void main(String[] args) {
 		IStateMachine tl = new TrafficLightControllerMachine();
         Scheduler s = new Scheduler(tl);
+
+		new ButtonListener(s, TrafficLightControllerMachinePi.PEDESTRIAN_BUTTON_PRESSED);
+
         s.start();
 
         try {
