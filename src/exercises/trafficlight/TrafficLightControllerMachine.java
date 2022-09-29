@@ -1,123 +1,137 @@
 package exercises.trafficlight;
 
+import runtime.EventWindow;
 import runtime.IStateMachine;
 import runtime.Scheduler;
 import runtime.Timer;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+
 public class TrafficLightControllerMachine implements IStateMachine {
-	public static final String PEDESTRIAN_BUTTON_PRESSED = "Pedestrian Button";
+
+	public static final int PORT = 10001;
+	public static final String HOSTNAME = "192.168.0.194";
+
+	private static final String PEDESTRIAN_BUTTON_PRESSED = "Pedestrian Button";
+	private static final String TIMER_0 = "t0";
+	private static final String TIMER_1 = "t1";
+	private static final String TIMER_2 = "t2";
+	private static final String TIMER_3 = "t3";
+	private static final String TIMER_4 = "t4";
+	private static final String TIMER_5 = "t5";
+
+	public static final String[] EVENTS = { PEDESTRIAN_BUTTON_PRESSED };
+
+	public static final String SYNC = "SYNC";
 
 	private enum STATES {
-		S0, S1, S2, S3, S4, S5, S6
+		S0, S1, S2, S3, S4, S5, WAIT
 	}
 
+	private Timer t0 = new Timer("t0");
 	private Timer t1 = new Timer("t1");
 	private Timer t2 = new Timer("t2");
 	private Timer t3 = new Timer("t3");
 	private Timer t4 = new Timer("t4");
 	private Timer t5 = new Timer("t5");
-	private Timer t6 = new Timer("t6");
 
-	protected STATES state = STATES.S0;
 
-	private TrafficLight cars = new TrafficLight(true);
-	private TrafficLight pedestrians = new TrafficLight(false);
+	protected STATES state = STATES.WAIT;
+	
+	//static final GpioController gpio = GpioFactory.getInstance();
+	//private TrafficLight cars = new TrafficLightPi("Cars", true, gpio);
+	//private TrafficLight pedestrians = new TrafficLightPi("Pedestrians", false, gpio);
 
-	private boolean pedestrianButtonPressed = false;
+	private TrafficLight cars = new TrafficLightPC("Cars", true, 140);
+	private TrafficLight pedestrians = new TrafficLightPC("Pedestrians", false, 265);
+	
+	private boolean buttonFlag = false;
 
 	public TrafficLightControllerMachine() {
+		// initial transition
 		cars.showGreen();
 		pedestrians.showRed();
 	}
 
 	public int fire(String event, Scheduler scheduler) {
-		switch (state) {
-			case S0:
-				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
-					cars.showYellow();
-					t1.start(scheduler, 1000);
-					t6.start(scheduler, 60*1000);
+		if (state == STATES.S1) {
+			if (event.equals(TIMER_1)) {
+				cars.showRed();
+				t2.start(scheduler, 2000);
+				state = STATES.S2;
+				return EXECUTE_TRANSITION;
+			}
+		} else if (state == STATES.S2) {
+			if (event.equals(TIMER_2)) {
+				pedestrians.showGreen();
+				t3.start(scheduler, 4000);
+				state = STATES.S3;
+				return EXECUTE_TRANSITION;
+			}
+		} else if(state == STATES.S3) {
+			if(event.equals(TIMER_3)) {
+				pedestrians.showRed();
+				t4.start(scheduler, 4000);
+				state = STATES.S4;
+				return EXECUTE_TRANSITION;
+			}
+		} else if(state == STATES.S4) {
+			if (event.equals(TIMER_4)) {
+				cars.showRedYellow();
+				t5.start(scheduler, 1000);
+				state = STATES.S5;
+				return EXECUTE_TRANSITION;
+			} else if(event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+				buttonFlag = true;
+				return EXECUTE_TRANSITION;
+			}
+		} else if(state == STATES.S5) {
+			if(event.equals(TIMER_5)) {
+				cars.showGreen();
+				state = STATES.WAIT;
+				return EXECUTE_TRANSITION;
+			} else if(event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+				buttonFlag = true;
+				return EXECUTE_TRANSITION;
+			}
+		} else if(state == STATES.WAIT) {
+			if(event.equals("SYNC")) {
+				//t0.start(scheduler, 60000);
+				if(buttonFlag) {
 					state = STATES.S1;
-					return EXECUTE_TRANSITION;
+					cars.showYellow();
+					t1.start(scheduler, 2000);
+					buttonFlag = false;
+				} else {
+					state = STATES.WAIT;
 				}
-				break;
-
-			case S1:
-				if (event.equals("t1")) {
-					cars.showRed();
-					t2.start(scheduler, 1000);
-					state = STATES.S2;
-					return EXECUTE_TRANSITION;
-				}
-				break;
-
-			case S2:
-				if (event.equals("t2")) {
-					pedestrians.showGreen();
-					t3.start(scheduler, 5000);
-					state = STATES.S3;
-					return EXECUTE_TRANSITION;
-				}
-				break;
-
-			case S3:
-				if (event.equals("t3")) {
-					pedestrians.showRed();
-					t4.start(scheduler, 1000);
-					state = STATES.S4;
-					return EXECUTE_TRANSITION;
-				}
-				break;
-
-			case S4:
-				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
-					pedestrianButtonPressed = true;
-					return EXECUTE_TRANSITION;
-				} else if (event.equals("t4")) {
-					cars.showRedYellow();
-					t5.start(scheduler, 1000);
-					state = STATES.S5;
-					return EXECUTE_TRANSITION;
-				}
-				break;
-
-			case S5:
-				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
-					pedestrianButtonPressed = true;
-					return EXECUTE_TRANSITION;
-				} else if (event.equals("t5")) {
-					cars.showGreen();
-					state = STATES.S6;
-					return EXECUTE_TRANSITION;
-				}
-				break;
-
-			case S6:
-				if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
-					pedestrianButtonPressed = true;
-					return EXECUTE_TRANSITION;
-				} else if (event.equals("t6")) {
-					t6.start(scheduler, 60*1000);
-					if (pedestrianButtonPressed) {
-						cars.showYellow();
-						t1.start(scheduler, 1000);
-						state = STATES.S1;
-						pedestrianButtonPressed = false;
-					}
-					return EXECUTE_TRANSITION;
-				}
-				break;
-		}
+				return EXECUTE_TRANSITION;
+			} else if(event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+				buttonFlag = true;
+				return EXECUTE_TRANSITION;
+			}
+		}	
 		return DISCARD_EVENT;
 	}
 
 	public static void main(String[] args) {
-		IStateMachine stm = new TrafficLightControllerMachine();
-		Scheduler scheduler = new Scheduler(stm);
+		IStateMachine tl = new TrafficLightControllerMachine();
+        Scheduler s = new Scheduler(tl);
+        EventWindow w = new EventWindow(TrafficLightControllerMachine.EVENTS, s1);
+        w.show();
+        s.start();
 
-		new ButtonListener(scheduler, TrafficLightControllerMachine.PEDESTRIAN_BUTTON_PRESSED);
-
-		scheduler.start();
+        try {
+            Socket clientSocket = new Socket(TrafficLightControllerMachine.HOSTNAME, TrafficLightControllerMachine.PORT);
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            while ((msg = in.readLine()) != null) {
+                tl.fire(msg)
+            } 
+        }
+        catch (IOException e) {
+            System.out.println("Exception caught when trying to listen on port "+ TrafficLightControllerMachine.PORT + " or listening for a connection");
+            System.out.println(e.getMessage()); 
+        }
 	}
-
 }

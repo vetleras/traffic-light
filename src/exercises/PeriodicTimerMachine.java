@@ -7,7 +7,7 @@ import runtime.Timer;
 
 public class PeriodicTimerMachine implements IStateMachine {
 
-	private static final String START = "Start", STOP = "Stop", TIMER_1 = "t1", EXIT = "Exit";
+	private static final String START = "Start", STOP = "Stop", EXIT = "Exit", TIMER_1 = "t1";
 	public static final String[] EVENTS = { START, STOP, EXIT };
 
 	private enum STATES {
@@ -17,19 +17,27 @@ public class PeriodicTimerMachine implements IStateMachine {
 	private Timer t1 = new Timer("t1");
 	protected STATES state = STATES.IDLE;
 
-	private static final int n = 5;
-	private int ticks = 0;
-
+	private final int NUM_TICKS;
+	private int tickCounter = 0;
+	
+	public PeriodicTimerMachine(int numTicks) {
+		NUM_TICKS = numTicks;
+	}
+	
+	public PeriodicTimerMachine() {
+		this(4);
+	}
 
 	public int fire(String event, Scheduler scheduler) {
 		if (state == STATES.IDLE) {
 			if (event.equals(START)) {
+				tickCounter = 0;
 				t1.start(scheduler, 1000);
 				state = STATES.ACTIVE;
 				return EXECUTE_TRANSITION;
 			} else if (event.equals(EXIT)) {
 				state = STATES.FINAL;
-				return TERMINATE_SYSTEM;
+				return EXECUTE_TRANSITION;
 			}
 		} else if (state == STATES.ACTIVE) {
 			if (event.equals(STOP)) {
@@ -37,19 +45,18 @@ public class PeriodicTimerMachine implements IStateMachine {
 				state = STATES.IDLE;
 				return EXECUTE_TRANSITION;
 			} else if (event.equals(TIMER_1)) {
-				ticks++;
-				System.out.format("tick %d\n", ticks);
-				if (ticks == n) {
-					state = STATES.IDLE;
-					ticks = 0;
-				} else {
+				System.out.println("tick " + tickCounter);
+				tickCounter++;
+				if (tickCounter < NUM_TICKS) {
 					t1.start(scheduler, 1000);
+					state = STATES.ACTIVE;
+				} else {
+					state = STATES.IDLE;
 				}
 				return EXECUTE_TRANSITION;
 			} else if (event.equals(EXIT)) {
-				t1.stop();
 				state = STATES.FINAL;
-				return TERMINATE_SYSTEM;
+				return EXECUTE_TRANSITION;
 			}
 		}
 		return DISCARD_EVENT;
