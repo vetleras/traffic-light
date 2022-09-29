@@ -18,7 +18,8 @@ public class ButtonListener implements GpioPinListenerDigital {
         this.scheduler = scheduler;
         this.event = event;
 
-        final GpioPinDigitalInput button = GpioFactory.getInstance().provisionDigitalInputPin(RaspiPin.GPIO_11, PinPullResistance.PULL_DOWN);
+        final GpioPinDigitalInput button = GpioFactory.getInstance().provisionDigitalInputPin(RaspiPin.GPIO_11,
+                PinPullResistance.PULL_DOWN);
         button.setShutdownOptions(true, PinState.LOW, PinPullResistance.OFF);
         button.addListener(this);
     }
@@ -27,6 +28,6 @@ public class ButtonListener implements GpioPinListenerDigital {
     public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent pinEvent) {
         if (pinEvent.getState() == PinState.LOW) {
             scheduler.addToQueueLast(event);
-        } 
+        }
     }
 }

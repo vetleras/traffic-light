@@ -10,7 +10,7 @@ import com.pi4j.io.gpio.RaspiPin;
 public class TrafficLightPi {
 	private Signal red, yellow, green;
 
-	public TrafficLightPi(boolean showYellow){
+	public TrafficLightPi(boolean showYellow) {
 		if (showYellow) {
 			red = new Signal(RaspiPin.GPIO_07);
 			yellow = new Signal(RaspiPin.GPIO_03);
@@ -23,18 +23,20 @@ public class TrafficLightPi {
 
 	public void showGreen() {
 		red.turnOff();
-		if(yellow!=null) yellow.turnOff();
+		if (yellow != null)
+			yellow.turnOff();
 		green.turnOn();
 	}
 
 	public void showRed() {
 		red.turnOn();
-		if(yellow!=null) yellow.turnOff();
+		if (yellow != null)
+			yellow.turnOff();
 		green.turnOff();
 	}
 
 	public void showRedYellow() {
-		if(yellow==null) {
+		if (yellow == null) {
 			throw new UnsupportedOperationException("Traffic light has no yellow light.");
 		}
 		red.turnOn();
@@ -43,7 +45,7 @@ public class TrafficLightPi {
 	}
 
 	public void showYellow() {
-		if(yellow==null) {
+		if (yellow == null) {
 			throw new UnsupportedOperationException("Traffic light has no yellow light.");
 		}
 		red.turnOff();
@@ -53,25 +55,25 @@ public class TrafficLightPi {
 
 	public void switchAllOff() {
 		red.turnOff();
-		if(yellow!=null) yellow.turnOff();
+		if (yellow != null)
+			yellow.turnOff();
 		green.turnOff();
 	}
-	
-	
-	private class Signal{
+
+	private class Signal {
 		private GpioPinDigitalOutput pin;
 
-		Signal(Pin pin){
+		Signal(Pin pin) {
 			this.pin = GpioFactory.getInstance().provisionDigitalOutputPin(pin, PinState.LOW);
 			this.pin.setShutdownOptions(true, PinState.LOW, PinPullResistance.OFF);
 		}
 
-		public void turnOn(){
-			pin.setState(PinState.HIGH);       
+		public void turnOn() {
+			pin.setState(PinState.HIGH);
 		}
 
-		public void turnOff(){
-			pin.setState(PinState.LOW);       
+		public void turnOff() {
+			pin.setState(PinState.LOW);
 		}
 	}
-}     
+}

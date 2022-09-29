@@ -1,6 +1,5 @@
 package exercises.trafficlight;
 
-
 interface TrafficLight {
     public void showGreen();
 
@@ -11,6 +10,5 @@ interface TrafficLight {
     public void showYellow();
 
     public void switchAllOff();
-	
-}
 
+}

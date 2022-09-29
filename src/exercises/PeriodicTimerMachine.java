@@ -19,11 +19,11 @@ public class PeriodicTimerMachine implements IStateMachine {
 
 	private final int NUM_TICKS;
 	private int tickCounter = 0;
-	
+
 	public PeriodicTimerMachine(int numTicks) {
 		NUM_TICKS = numTicks;
 	}
-	
+
 	public PeriodicTimerMachine() {
 		this(4);
 	}

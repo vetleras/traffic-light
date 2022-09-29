@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-
 public class TrafficLightControllerMachine implements IStateMachine {
 
 	public static final int PORT = 10001;
@@ -42,16 +41,16 @@ public class TrafficLightControllerMachine implements IStateMachine {
 	private Timer t4 = new Timer("t4");
 	private Timer t5 = new Timer("t5");
 
-
 	protected STATES state = STATES.WAIT;
-	
-	//static final GpioController gpio = GpioFactory.getInstance();
-	//private TrafficLight cars = new TrafficLightPi("Cars", true, gpio);
-	//private TrafficLight pedestrians = new TrafficLightPi("Pedestrians", false, gpio);
+
+	// static final GpioController gpio = GpioFactory.getInstance();
+	// private TrafficLight cars = new TrafficLightPi("Cars", true, gpio);
+	// private TrafficLight pedestrians = new TrafficLightPi("Pedestrians", false,
+	// gpio);
 
 	private TrafficLight cars = new TrafficLightPC("Cars", true, 140);
 	private TrafficLight pedestrians = new TrafficLightPC("Pedestrians", false, 265);
-	
+
 	private boolean buttonFlag = false;
 
 	public TrafficLightControllerMachine() {
@@ -75,36 +74,36 @@ public class TrafficLightControllerMachine implements IStateMachine {
 				state = STATES.S3;
 				return EXECUTE_TRANSITION;
 			}
-		} else if(state == STATES.S3) {
-			if(event.equals(TIMER_3)) {
+		} else if (state == STATES.S3) {
+			if (event.equals(TIMER_3)) {
 				pedestrians.showRed();
 				t4.start(scheduler, 4000);
 				state = STATES.S4;
 				return EXECUTE_TRANSITION;
 			}
-		} else if(state == STATES.S4) {
+		} else if (state == STATES.S4) {
 			if (event.equals(TIMER_4)) {
 				cars.showRedYellow();
 				t5.start(scheduler, 1000);
 				state = STATES.S5;
 				return EXECUTE_TRANSITION;
-			} else if(event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+			} else if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
 				buttonFlag = true;
 				return EXECUTE_TRANSITION;
 			}
-		} else if(state == STATES.S5) {
-			if(event.equals(TIMER_5)) {
+		} else if (state == STATES.S5) {
+			if (event.equals(TIMER_5)) {
 				cars.showGreen();
 				state = STATES.WAIT;
 				return EXECUTE_TRANSITION;
-			} else if(event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+			} else if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
 				buttonFlag = true;
 				return EXECUTE_TRANSITION;
 			}
-		} else if(state == STATES.WAIT) {
-			if(event.equals("SYNC")) {
-				//t0.start(scheduler, 60000);
-				if(buttonFlag) {
+		} else if (state == STATES.WAIT) {
+			if (event.equals("SYNC")) {
+				// t0.start(scheduler, 60000);
+				if (buttonFlag) {
 					state = STATES.S1;
 					cars.showYellow();
 					t1.start(scheduler, 2000);
@@ -113,32 +112,33 @@ public class TrafficLightControllerMachine implements IStateMachine {
 					state = STATES.WAIT;
 				}
 				return EXECUTE_TRANSITION;
-			} else if(event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
+			} else if (event.equals(PEDESTRIAN_BUTTON_PRESSED)) {
 				buttonFlag = true;
 				return EXECUTE_TRANSITION;
 			}
-		}	
+		}
 		return DISCARD_EVENT;
 	}
 
 	public static void main(String[] args) {
 		IStateMachine tl = new TrafficLightControllerMachine();
-        Scheduler s = new Scheduler(tl);
-        EventWindow w = new EventWindow(TrafficLightControllerMachine.EVENTS, s);
-        w.show();
-        s.start();
+		Scheduler s = new Scheduler(tl);
+		EventWindow w = new EventWindow(TrafficLightControllerMachine.EVENTS, s);
+		w.show();
+		s.start();
 
-        try {
-            Socket clientSocket = new Socket(TrafficLightControllerMachine.HOSTNAME, TrafficLightControllerMachine.PORT);
+		try {
+			Socket clientSocket = new Socket(TrafficLightControllerMachine.HOSTNAME,
+					TrafficLightControllerMachine.PORT);
 			System.out.println("Connected to" + clientSocket.getRemoteSocketAddress());
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			while (true) {
-                tl.fire(in.readLine(), s); 
-            }
-        }
-        catch (IOException e) {
-            System.out.println("Exception caught when trying to listen on port "+ TrafficLightControllerMachine.PORT + " or listening for a connection");
-            System.out.println(e.getMessage()); 
-        }
+				tl.fire(in.readLine(), s);
+			}
+		} catch (IOException e) {
+			System.out.println("Exception caught when trying to listen on port " + TrafficLightControllerMachine.PORT
+					+ " or listening for a connection");
+			System.out.println(e.getMessage());
+		}
 	}
 }
