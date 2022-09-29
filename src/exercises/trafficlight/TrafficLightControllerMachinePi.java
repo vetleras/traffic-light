@@ -119,7 +119,7 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	}
 
 	public static void main(String[] args) {
-		IStateMachine tl = new TrafficLightControllerMachine();
+		IStateMachine tl = new TrafficLightControllerMachinePi();
         Scheduler s = new Scheduler(tl);
 
 		new ButtonListener(s, TrafficLightControllerMachinePi.PEDESTRIAN_BUTTON_PRESSED);
