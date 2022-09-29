@@ -122,8 +122,6 @@ public class TrafficLightControllerMachinePi implements IStateMachine {
 	public static void main(String[] args) {
 		IStateMachine tl = new TrafficLightControllerMachine();
         Scheduler s = new Scheduler(tl);
-        EventWindow w = new EventWindow(TrafficLightControllerMachine.EVENTS, s);
-        w.show();
         s.start();
 
         try {
