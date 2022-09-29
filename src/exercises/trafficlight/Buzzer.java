@@ -1,48 +1,27 @@
 package exercises.trafficlight;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.wiringpi.SoftTone;
+// https://pi4j.com/1.4/apidocs/com/pi4j/wiringpi/SoftTone.html
 
 public class Buzzer {
-
-	private GpioController controller;
-	private GpioPinDigitalOutput buzzer;
-
-    private static int 
-        PEDPULSE = 2000,
-        CARPULSE = 1000;
+	private final int PIN = 10;
 
 	public Buzzer() {
-        this.controller = GpioFactory.getInstance();
-        this.buzzer = this.controller.provisionDigitalOutputPin(
-            RaspiPin.GPIO_10,
-            "Buzzer",
-            PinState.LOW
-        );
-        this.buzzer.setShutdownOptions(true, PinState.LOW, PinPullResistance.OFF);
-    }
+		SoftTone.softToneCreate(PIN);
+	}
 
-    public void pedestrian() {
-        System.out.println("Pedestrian buzzing");
-        buzzer.high();
-        this.buzzer.pulse(PEDPULSE);
-    }
+	public void pedestrian() {
+		System.out.println("Pedestrian buzzing");
+		SoftTone.softToneWrite(10, 700);
+	}
 
-    public void car() {
-        System.out.println("Car buzzing");
-        buzzer.high();
-        this.buzzer.pulse(CARPULSE);
-    }
+	public void car() {
+		System.out.println("Car buzz");
+		SoftTone.softToneWrite(10, 1000);
+	}
 
-    public void off() {
-        System.out.println("Buzzer off");
-        buzzer.low();
-        this.buzzer.low();
-    }
-
+	public void off() {
+		System.out.println("Buzzer off");
+		SoftTone.softToneStop(PIN);
+	}
 }
