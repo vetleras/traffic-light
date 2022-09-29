@@ -28,14 +28,20 @@ public class Buzzer {
     }
 
     public void pedestrian() {
+        System.out.println("Pedestrian buzzing");
+        buzzer.high();
         this.buzzer.pulse(PEDPULSE);
     }
 
     public void car() {
+        System.out.println("Car buzzing");
+        buzzer.high();
         this.buzzer.pulse(CARPULSE);
     }
 
     public void off() {
+        System.out.println("Buzzer off");
+        buzzer.low();
         this.buzzer.low();
     }
 
