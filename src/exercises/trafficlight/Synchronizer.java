@@ -4,7 +4,12 @@ import runtime.EventWindow;
 import runtime.IStateMachine;
 import runtime.Scheduler;
 import runtime.Timer;
+
+import java.io.IOException;
 import java.io.PrintWriter;
+
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Synchronizer implements IStateMachine {
 
@@ -37,7 +42,7 @@ public class Synchronizer implements IStateMachine {
       case S12:
         if (event.equals("T3")) {
           System.out.println(event);
-          out3.print(SYNC);
+          out3.println(SYNC);
           T12.start(scheduler, 30000);
           state = STATES.S3;
           return EXECUTE_TRANSITION;
@@ -45,8 +50,8 @@ public class Synchronizer implements IStateMachine {
         break;
       case S3:
         if (event.equals("T12")) {
-          out1.print(SYNC);
-          out2.print(SYNC);
+          out1.println(SYNC);
+          out2.println(SYNC);
           System.out.println(event);
           T3.start(scheduler, 30000);
           state = STATES.S12;
@@ -79,7 +84,7 @@ public class Synchronizer implements IStateMachine {
       } catch (IOException e) {
         System.out.println(
           "Exception caught when trying to listen on port " +
-          portNumber +
+          TrafficLightControllerMachine.PORT +
           " or listening for a connection"
         );
         System.out.println(e.getMessage());

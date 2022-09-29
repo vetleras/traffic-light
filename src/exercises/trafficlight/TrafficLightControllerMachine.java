@@ -8,6 +8,12 @@ import runtime.Timer;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 
+import java.net.Socket;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+
 public class TrafficLightControllerMachine implements IStateMachine {
 
 	public static final int PORT = 10001;
@@ -118,16 +124,16 @@ public class TrafficLightControllerMachine implements IStateMachine {
 	public static void main(String[] args) {
 		IStateMachine tl = new TrafficLightControllerMachine();
         Scheduler s = new Scheduler(tl);
-        EventWindow w = new EventWindow(TrafficLightControllerMachine.EVENTS, s1);
+        EventWindow w = new EventWindow(TrafficLightControllerMachine.EVENTS, s);
         w.show();
         s.start();
 
         try {
             Socket clientSocket = new Socket(TrafficLightControllerMachine.HOSTNAME, TrafficLightControllerMachine.PORT);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            while ((msg = in.readLine()) != null) {
-                tl.fire(msg)
-            } 
+			while (true) {
+                tl.fire(in.readLine(), s); 
+            }
         }
         catch (IOException e) {
             System.out.println("Exception caught when trying to listen on port "+ TrafficLightControllerMachine.PORT + " or listening for a connection");
