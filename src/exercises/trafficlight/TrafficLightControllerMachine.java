@@ -130,6 +130,7 @@ public class TrafficLightControllerMachine implements IStateMachine {
 
         try {
             Socket clientSocket = new Socket(TrafficLightControllerMachine.HOSTNAME, TrafficLightControllerMachine.PORT);
+			System.out.println("Connected to" + clientSocket.getRemoteSocketAddress());
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			while (true) {
                 tl.fire(in.readLine(), s); 

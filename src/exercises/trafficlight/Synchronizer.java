@@ -69,8 +69,11 @@ public class Synchronizer implements IStateMachine {
         ServerSocket serverSocket = new ServerSocket(TrafficLightControllerMachine.PORT);
   
         Socket cs1 = serverSocket.accept();
+        System.out.println(cs1.getRemoteSocketAddress());
         Socket cs2 = serverSocket.accept();
+        System.out.println(cs2.getRemoteSocketAddress());
         Socket cs3 = serverSocket.accept();
+        System.out.println(cs3.getRemoteSocketAddress());
         PrintWriter out1 = new PrintWriter(cs1.getOutputStream(), true);
         PrintWriter out2 = new PrintWriter(cs2.getOutputStream(), true);
         PrintWriter out3 = new PrintWriter(cs3.getOutputStream(), true);
